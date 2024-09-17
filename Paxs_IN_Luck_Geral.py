@@ -141,7 +141,7 @@ if atualizar_dados:
 
 st.divider()
 
-if data_inicial and data_final and base_luck!='Todas' and base_luck and data_inicial.month == data_final.month:
+if data_inicial and data_final and base_luck!='Todas' and base_luck:
 
     if base_luck=='João Pessoa':
 
@@ -280,7 +280,15 @@ elif data_inicial and data_final and base_luck=='Todas' and data_inicial.month !
 
         df_mapa_filtrado_group_2 = pd.merge(df_mapa_filtrado_group_2, df_ref[['Ano/Mês', base_luck]], on=['Ano/Mês'], how='left')
 
-        
+    df_mapa_filtrado_group_geral = mapa_router_geral_filtrado.groupby('Base Luck')['Paxs Totais'].sum().reset_index()
 
-    grafico_quatro_linhas_numero(df_mapa_filtrado_group_2, 'Ano/Mês', 'JPA', 'João Pessoa', 'NAT', 'Natal', 'REC', 'Recife', 'MCZ', 
-                                 'Maceió', 'Paxs IN')
+    row1 = st.columns(2)
+
+    with row1[0]:
+
+        grafico_quatro_linhas_numero(df_mapa_filtrado_group_2, 'Ano/Mês', 'JPA', 'João Pessoa', 'NAT', 'Natal', 'REC', 'Recife', 'MCZ', 
+                                    'Maceió', 'Paxs IN')
+        
+    with row1[1]:
+
+        grafico_pizza(df_mapa_filtrado_group_geral)
