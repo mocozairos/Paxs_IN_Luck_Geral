@@ -56,8 +56,8 @@ def grafico_pizza(df):
     st.pyplot(fig)
     plt.close(fig)
 
-def grafico_quatro_linhas_numero(referencia, eixo_x, eixo_y_1, ref_1_label, eixo_y_2, ref_2_label, eixo_y_3, ref_3_label, eixo_y_4, 
-                                 ref_4_label, titulo):
+def grafico_cinco_linhas_numero(referencia, eixo_x, eixo_y_1, ref_1_label, eixo_y_2, ref_2_label, eixo_y_3, ref_3_label, eixo_y_4, 
+                                ref_4_label, eixo_y_5, ref_5_label, titulo):
     
     fig, ax = plt.subplots(figsize=(15, 8))
     
@@ -65,6 +65,7 @@ def grafico_quatro_linhas_numero(referencia, eixo_x, eixo_y_1, ref_1_label, eixo
     ax.plot(referencia[eixo_x], referencia[eixo_y_2], label = ref_2_label, linewidth = 0.5, color = 'blue')
     ax.plot(referencia[eixo_x], referencia[eixo_y_3], label = ref_3_label, linewidth = 0.5, color = 'black')
     ax.plot(referencia[eixo_x], referencia[eixo_y_4], label = ref_4_label, linewidth = 0.5, color = 'green')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_5], label = ref_5_label, linewidth = 0.5, color = 'orange')
     
     for i in range(len(referencia[eixo_x])):
         texto = str(int(referencia[eixo_y_1][i]))
@@ -78,6 +79,9 @@ def grafico_quatro_linhas_numero(referencia, eixo_x, eixo_y_1, ref_1_label, eixo
     for i in range(len(referencia[eixo_x])):
         texto = str(int(referencia[eixo_y_4][i]))
         plt.text(referencia[eixo_x][i], referencia[eixo_y_4][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_5][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_5][i], texto, ha='center', va='bottom')
 
     plt.title(titulo, fontsize=30)
     plt.xlabel('Ano/Mês')
@@ -97,7 +101,7 @@ if 'mapa_router_jp' not in st.session_state:
 
     st.session_state.mapa_router_mcz = gerar_df_phoenix('vw_router', 'maceio')
 
-    # st.session_state.mapa_router_ssa = gerar_df_phoenix('vw_router', 'salvador')
+    st.session_state.mapa_router_ssa = gerar_df_phoenix('vw_router', 'salvador')
 
     # st.session_state.mapa_router_nor = gerar_df_phoenix('vw_router', 'noronha')
 
@@ -115,7 +119,7 @@ with row0[0]:
 
     data_final = st.date_input('Data Final', value=None ,format='DD/MM/YYYY', key='data_final')
 
-    base_luck = st.radio('Base Luck', ['João Pessoa', 'Natal', 'Recife', 'Maceió', 'Todas'], index=None)
+    base_luck = st.radio('Base Luck', ['João Pessoa', 'Natal', 'Recife', 'Maceió', 'Salvador', 'Todas'], index=None)
 
 with row0[1]:
 
@@ -133,7 +137,7 @@ if atualizar_dados:
 
     st.session_state.mapa_router_mcz = gerar_df_phoenix('vw_router', 'maceio')
 
-    # st.session_state.mapa_router_ssa = gerar_df_phoenix('vw_router', 'salvador')
+    st.session_state.mapa_router_ssa = gerar_df_phoenix('vw_router', 'salvador')
 
     # st.session_state.mapa_router_nor = gerar_df_phoenix('vw_router', 'noronha')
 
@@ -159,9 +163,9 @@ if data_inicial and data_final and base_luck!='Todas' and base_luck:
 
         df_mapa_ref = st.session_state.mapa_router_mcz
 
-    # elif base_luck=='Salvador':
+    elif base_luck=='Salvador':
 
-    #     df_mapa_ref = st.session_state.mapa_router_ssa
+        df_mapa_ref = st.session_state.mapa_router_ssa
 
     # elif base_luck=='Aracajú':
 
@@ -209,7 +213,11 @@ elif data_inicial and data_final and base_luck=='Todas' and data_inicial.month =
 
     mapa_router_mcz['Base Luck'] = 'MCZ'
 
-    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz], ignore_index=True)
+    mapa_router_ssa = st.session_state.mapa_router_ssa
+
+    mapa_router_ssa['Base Luck'] = 'SSA'
+
+    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz, mapa_router_ssa], ignore_index=True)
 
     mapa_router_geral_filtrado = mapa_router_geral[(mapa_router_geral['Data Execucao'] >= data_inicial) & 
                                                    (mapa_router_geral['Data Execucao'] <= data_final) & 
@@ -249,7 +257,11 @@ elif data_inicial and data_final and base_luck=='Todas' and data_inicial.month !
 
     mapa_router_mcz['Base Luck'] = 'MCZ'
 
-    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz], ignore_index=True)
+    mapa_router_ssa = st.session_state.mapa_router_ssa
+
+    mapa_router_ssa['Base Luck'] = 'SSA'
+
+    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz, mapa_router_ssa], ignore_index=True)
 
     mapa_router_geral_filtrado = mapa_router_geral[(mapa_router_geral['Data Execucao'] >= data_inicial) & 
                                                    (mapa_router_geral['Data Execucao'] <= data_final) & 
@@ -286,8 +298,8 @@ elif data_inicial and data_final and base_luck=='Todas' and data_inicial.month !
 
     with row1[0]:
 
-        grafico_quatro_linhas_numero(df_mapa_filtrado_group_2, 'Ano/Mês', 'JPA', 'João Pessoa', 'NAT', 'Natal', 'REC', 'Recife', 'MCZ', 
-                                    'Maceió', 'Paxs IN')
+        grafico_cinco_linhas_numero(df_mapa_filtrado_group_2, 'Ano/Mês', 'JPA', 'João Pessoa', 'NAT', 'Natal', 'REC', 'Recife', 'MCZ', 
+                                    'Maceió', 'SSA', 'Salvador', 'Paxs IN')
         
     with row1[1]:
 
