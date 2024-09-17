@@ -2,6 +2,7 @@ import pandas as pd
 import mysql.connector
 import decimal
 import streamlit as st
+import matplotlib.pyplot as plt
 
 def gerar_df_phoenix(vw_name, base):
     # Parametros de Login AWS
@@ -37,6 +38,52 @@ def gerar_df_phoenix(vw_name, base):
     df = pd.DataFrame(resultado, columns=cabecalho)
     df = df.applymap(lambda x: float(x) if isinstance(x, decimal.Decimal) else x)
     return df
+
+def grafico_pizza(df):
+
+    borda_preto = {'linewidth': 2, 'edgecolor': 'black'}
+
+    fig, ax = plt.subplots(figsize=(5, 8))
+
+    plt.pie(df['Paxs Totais'], labels=df['Base Luck'], autopct='%1.1f%%', startangle=90, wedgeprops=borda_preto)
+
+    ax.set_aspect('equal')
+
+    fig.patch.set_edgecolor('black')
+
+    fig.patch.set_linewidth(5)
+
+    st.pyplot(fig)
+    plt.close(fig)
+
+def grafico_quatro_linhas_numero(referencia, eixo_x, eixo_y_1, ref_1_label, eixo_y_2, ref_2_label, eixo_y_3, ref_3_label, eixo_y_4, 
+                                 ref_4_label, titulo):
+    
+    fig, ax = plt.subplots(figsize=(15, 8))
+    
+    plt.plot(referencia[eixo_x], referencia[eixo_y_1], label = ref_1_label, linewidth = 0.5, color = 'red')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_2], label = ref_2_label, linewidth = 0.5, color = 'blue')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_3], label = ref_3_label, linewidth = 0.5, color = 'black')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_4], label = ref_4_label, linewidth = 0.5, color = 'green')
+    
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_1][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_1][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_2][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_2][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_3][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_3][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_4][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_4][i], texto, ha='center', va='bottom')
+
+    plt.title(titulo, fontsize=30)
+    plt.xlabel('Ano/Mês')
+    ax.legend(loc='lower right', bbox_to_anchor=(1.2, 1))
+    st.pyplot(fig)
+    plt.close(fig)
 
 st.set_page_config(layout='wide')
 
@@ -94,7 +141,7 @@ if atualizar_dados:
 
 st.divider()
 
-if data_inicial and data_final and base_luck!='Todas' and base_luck:
+if data_inicial and data_final and base_luck!='Todas' and base_luck and data_inicial.month == data_final.month:
 
     if base_luck=='João Pessoa':
 
@@ -120,6 +167,10 @@ if data_inicial and data_final and base_luck!='Todas' and base_luck:
 
     #     df_mapa_ref = st.session_state.mapa_router_ara
 
+    # elif base_luck=='Noronha':
+
+    #     df_mapa_ref = st.session_state.mapa_router_nor
+
     df_mapa_filtrado = df_mapa_ref[(df_mapa_ref['Data Execucao'] >= data_inicial) & (df_mapa_ref['Data Execucao'] <= data_final) & 
                                    (df_mapa_ref['Tipo de Servico']=='IN') & (df_mapa_ref['Status do Servico']!='CANCELADO') & 
                                    (df_mapa_ref['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
@@ -140,7 +191,7 @@ if data_inicial and data_final and base_luck!='Todas' and base_luck:
 
 
 
-elif data_inicial and data_final and base_luck=='Todas':
+elif data_inicial and data_final and base_luck=='Todas' and data_inicial.month == data_final.month:
 
     mapa_router_jp = st.session_state.mapa_router_jp
 
@@ -170,9 +221,66 @@ elif data_inicial and data_final and base_luck=='Todas':
 
     df_mapa_filtrado_group = mapa_router_geral_filtrado.groupby('Base Luck')['Paxs Totais'].sum().reset_index()
 
-    st.dataframe(df_mapa_filtrado_group.sort_values(by='Paxs Totais', ascending=False), hide_index=True)
+    row1 = st.columns(2)
 
+    with row1[0]:
 
+        st.dataframe(df_mapa_filtrado_group.sort_values(by='Paxs Totais', ascending=False), hide_index=True)
 
+    with row1[1]:
 
+        grafico_pizza(df_mapa_filtrado_group)
 
+elif data_inicial and data_final and base_luck=='Todas' and data_inicial.month != data_final.month:
+
+    mapa_router_jp = st.session_state.mapa_router_jp
+
+    mapa_router_jp['Base Luck'] = 'JPA'
+
+    mapa_router_rec = st.session_state.mapa_router_rec
+
+    mapa_router_rec['Base Luck'] = 'REC'
+
+    mapa_router_nat = st.session_state.mapa_router_nat
+
+    mapa_router_nat['Base Luck'] = 'NAT'
+
+    mapa_router_mcz = st.session_state.mapa_router_mcz
+
+    mapa_router_mcz['Base Luck'] = 'MCZ'
+
+    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz], ignore_index=True)
+
+    mapa_router_geral_filtrado = mapa_router_geral[(mapa_router_geral['Data Execucao'] >= data_inicial) & 
+                                                   (mapa_router_geral['Data Execucao'] <= data_final) & 
+                                                   (mapa_router_geral['Tipo de Servico']=='IN') & 
+                                                   (mapa_router_geral['Status do Servico']!='CANCELADO') & 
+                                                   (mapa_router_geral['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
+    
+    mapa_router_geral_filtrado['Paxs Totais'] = mapa_router_geral_filtrado['Total ADT'] + mapa_router_geral_filtrado['Total CHD']
+
+    mapa_router_geral_filtrado['Data Execucao'] = pd.to_datetime(mapa_router_geral_filtrado['Data Execucao'])
+
+    mapa_router_geral_filtrado['mes'] = mapa_router_geral_filtrado['Data Execucao'].dt.month
+
+    mapa_router_geral_filtrado['ano'] = mapa_router_geral_filtrado['Data Execucao'].dt.year
+
+    mapa_router_geral_filtrado['Ano/Mês'] = mapa_router_geral_filtrado['mes'].astype(str) + '/' + \
+        mapa_router_geral_filtrado['ano'].astype(str).str[-2:]
+    
+    df_mapa_filtrado_group = mapa_router_geral_filtrado.groupby(['Ano/Mês', 'Base Luck'])['Paxs Totais'].sum().reset_index()
+
+    df_mapa_filtrado_group_2 = pd.DataFrame(df_mapa_filtrado_group['Ano/Mês'].unique(), columns=['Ano/Mês'])
+
+    for base_luck in df_mapa_filtrado_group['Base Luck'].unique().tolist():
+
+        df_ref = df_mapa_filtrado_group[df_mapa_filtrado_group['Base Luck']==base_luck].reset_index(drop=True)
+
+        df_ref = df_ref.rename(columns={'Paxs Totais': base_luck})
+
+        df_mapa_filtrado_group_2 = pd.merge(df_mapa_filtrado_group_2, df_ref[['Ano/Mês', base_luck]], on=['Ano/Mês'], how='left')
+
+        
+
+    grafico_quatro_linhas_numero(df_mapa_filtrado_group_2, 'Ano/Mês', 'JPA', 'João Pessoa', 'NAT', 'Natal', 'REC', 'Recife', 'MCZ', 
+                                 'Maceió', 'Paxs IN')
