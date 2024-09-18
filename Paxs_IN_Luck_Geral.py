@@ -243,7 +243,7 @@ if 'mapa_router_jp' not in st.session_state:
 
     puxar_dfs_base_phoenix()
 
-st.title('Paxs IN - Luck Geral')
+st.title('Luck Geral')
 
 st.divider()
 
