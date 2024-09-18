@@ -182,6 +182,11 @@ def puxar_dfs_base_phoenix():
 
         st.session_state.mapa_router_jp = gerar_df_phoenix('vw_router', 'joao_pessoa')
 
+        st.session_state.mapa_router_jp = \
+        st.session_state.mapa_router_jp[(st.session_state.mapa_router_jp['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
+                                        (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE NOTURNO') & 
+                                        (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE DIURNO ')].reset_index(drop=True)
+
         st.session_state.mapa_router_rec = gerar_df_phoenix('vw_router', 'recife')
 
         st.session_state.mapa_router_nat = gerar_df_phoenix('vw_router', 'natal')
