@@ -5,7 +5,6 @@ import streamlit as st
 import matplotlib.pyplot as plt
 
 def gerar_df_phoenix(vw_name, base):
-    # Parametros de Login AWS
 
     nome_base = f'test_phoenix_{base}'
 
