@@ -39,6 +39,80 @@ def gerar_df_phoenix(vw_name, base):
     df = df.applymap(lambda x: float(x) if isinstance(x, decimal.Decimal) else x)
     return df
 
+def puxar_dfs_base_phoenix():
+
+    with st.spinner('Aguarde enquanto os dados do phoenix estão sendo puxados...'):
+
+        st.session_state.mapa_router_jp = gerar_df_phoenix('vw_router', 'joao_pessoa')
+
+        st.session_state.mapa_router_rec = gerar_df_phoenix('vw_router', 'recife')
+
+        st.session_state.mapa_router_nat = gerar_df_phoenix('vw_router', 'natal')
+
+        st.session_state.mapa_router_mcz = gerar_df_phoenix('vw_router', 'maceio')
+
+        st.session_state.mapa_router_ssa = gerar_df_phoenix('vw_router', 'salvador')
+
+        st.session_state.mapa_router_nor = gerar_df_phoenix('vw_router', 'noronha')
+
+        # st.session_state.mapa_router_ara = gerar_df_phoenix('vw_router', 'aracaju')
+
+    st.success('Dados baixados com sucesso!')
+
+def gerar_dfs_base(base_luck):
+
+    if base_luck=='João Pessoa':
+
+        df = st.session_state.mapa_router_jp[(st.session_state.mapa_router_jp['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
+                                             (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE NOTURNO') & 
+                                             (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE DIURNO ') & 
+                                             (st.session_state.mapa_router_jp['Status do Servico'] != 'CANCELADO')]\
+                                                .reset_index(drop=True)
+
+        return df
+
+    elif base_luck=='Recife':
+
+        df = st.session_state.mapa_router_rec[(st.session_state.mapa_router_rec['Status do Servico']!='CANCELADO') & 
+                                              (st.session_state.mapa_router_rec['Status do Servico']!='RASCUNHO')]\
+                                                .reset_index(drop=True)
+    
+        return df
+
+    elif base_luck=='Natal':
+
+        df = st.session_state.mapa_router_nat[(st.session_state.mapa_router_nat['Status do Servico']!='CANCELADO')]\
+            .reset_index(drop=True)
+
+        return df
+
+    elif base_luck=='Maceió':
+
+        df = st.session_state.mapa_router_mcz[(st.session_state.mapa_router_mcz['Status do Servico']!='CANCELADO')]\
+            .reset_index(drop=True)
+        
+        df = df[~df['Observacao'].str.upper().str.contains('CLD', na=False)]
+
+        return df
+
+    elif base_luck=='Salvador':
+
+        df = st.session_state.mapa_router_ssa[(st.session_state.mapa_router_ssa['Status do Servico']!='CANCELADO')]\
+            .reset_index(drop=True)
+
+        return df
+
+    # elif base_luck=='Aracajú':
+
+    #     return st.session_state.mapa_router_ara
+
+    elif base_luck=='Noronha':
+
+        df = st.session_state.mapa_router_nor[(st.session_state.mapa_router_nor['Status do Servico']!='CANCELADO')]\
+            .reset_index(drop=True)
+
+        return df
+
 def grafico_pizza(df, coluna_valores, coluna_labels):
 
     borda_preto = {'linewidth': 2, 'edgecolor': 'black'}
@@ -53,6 +127,43 @@ def grafico_pizza(df, coluna_valores, coluna_labels):
 
     fig.patch.set_linewidth(5)
 
+    st.pyplot(fig)
+    plt.close(fig)
+
+def grafico_seis_linhas_numero(referencia, eixo_x, eixo_y_1, ref_1_label, eixo_y_2, ref_2_label, eixo_y_3, ref_3_label, eixo_y_4, 
+                                 ref_4_label, eixo_y_5, ref_5_label, eixo_y_6, ref_6_label, titulo):
+    
+    fig, ax = plt.subplots(figsize=(15, 8))
+    
+    plt.plot(referencia[eixo_x], referencia[eixo_y_1], label = ref_1_label, linewidth = 0.5, color = 'red')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_2], label = ref_2_label, linewidth = 0.5, color = 'blue')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_3], label = ref_3_label, linewidth = 0.5, color = 'black')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_4], label = ref_4_label, linewidth = 0.5, color = 'green')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_5], label = ref_5_label, linewidth = 0.5, color = 'orange')
+    ax.plot(referencia[eixo_x], referencia[eixo_y_6], label = ref_6_label, linewidth = 0.5, color = 'gray')
+    
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_1][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_1][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_2][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_2][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_3][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_3][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_4][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_4][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_5][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_5][i], texto, ha='center', va='bottom')
+    for i in range(len(referencia[eixo_x])):
+        texto = str(int(referencia[eixo_y_6][i]))
+        plt.text(referencia[eixo_x][i], referencia[eixo_y_6][i], texto, ha='center', va='bottom')
+
+    plt.title(titulo, fontsize=30)
+    plt.xlabel('Ano/Mês')
+    ax.legend(loc='lower right', bbox_to_anchor=(1.2, 1))
     st.pyplot(fig)
     plt.close(fig)
 
@@ -134,36 +245,6 @@ def grafico_linha_numero(referencia, eixo_x, eixo_y_1, ref_1_label, titulo):
     st.pyplot(fig)
     plt.close(fig)
 
-def gerar_dfs_base(base_luck):
-
-    if base_luck=='João Pessoa':
-
-        return st.session_state.mapa_router_jp
-
-    elif base_luck=='Recife':
-
-        return st.session_state.mapa_router_rec
-
-    elif base_luck=='Natal':
-
-        return st.session_state.mapa_router_nat
-
-    elif base_luck=='Maceió':
-
-        return st.session_state.mapa_router_mcz
-
-    elif base_luck=='Salvador':
-
-        return st.session_state.mapa_router_ssa
-
-    # elif base_luck=='Aracajú':
-
-    #     return st.session_state.mapa_router_ara
-
-    # elif base_luck=='Noronha':
-
-    #     return st.session_state.mapa_router_nor
-
 def criar_coluna_ano_mes(df_mapa_filtrado):
 
     df_mapa_filtrado['Data Execucao'] = pd.to_datetime(df_mapa_filtrado['Data Execucao'])
@@ -176,54 +257,45 @@ def criar_coluna_ano_mes(df_mapa_filtrado):
 
     return df_mapa_filtrado
 
-def puxar_dfs_base_phoenix():
-
-    with st.spinner('Aguarde enquanto os dados do phoenix estão sendo puxados...'):
-
-        st.session_state.mapa_router_jp = gerar_df_phoenix('vw_router', 'joao_pessoa')
-
-        st.session_state.mapa_router_jp = \
-        st.session_state.mapa_router_jp[(st.session_state.mapa_router_jp['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
-                                        (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE NOTURNO') & 
-                                        (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE DIURNO ')].reset_index(drop=True)
-
-        st.session_state.mapa_router_rec = gerar_df_phoenix('vw_router', 'recife')
-
-        st.session_state.mapa_router_nat = gerar_df_phoenix('vw_router', 'natal')
-
-        st.session_state.mapa_router_mcz = gerar_df_phoenix('vw_router', 'maceio')
-
-        st.session_state.mapa_router_ssa = gerar_df_phoenix('vw_router', 'salvador')
-
-        # st.session_state.mapa_router_nor = gerar_df_phoenix('vw_router', 'noronha')
-
-        # st.session_state.mapa_router_ara = gerar_df_phoenix('vw_router', 'aracaju')
-
-    st.success('Dados baixados com sucesso!')
-
 def gerar_mapa_router_geral():
 
-    mapa_router_jp = st.session_state.mapa_router_jp
+    mapa_router_jp = st.session_state.mapa_router_jp[(st.session_state.mapa_router_jp['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
+                                                     (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE NOTURNO') & 
+                                                     (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE DIURNO ') & 
+                                                     (st.session_state.mapa_router_jp['Status do Servico'] != 'CANCELADO')]\
+                                                     .reset_index(drop=True)
 
     mapa_router_jp['Base Luck'] = 'JPA'
 
-    mapa_router_rec = st.session_state.mapa_router_rec
+    mapa_router_rec = st.session_state.mapa_router_rec[(st.session_state.mapa_router_rec['Status do Servico']!='CANCELADO') & 
+                                                       (st.session_state.mapa_router_rec['Status do Servico']!='RASCUNHO')]\
+                                                        .reset_index(drop=True)
 
     mapa_router_rec['Base Luck'] = 'REC'
 
-    mapa_router_nat = st.session_state.mapa_router_nat
+    mapa_router_nat = st.session_state.mapa_router_nat[(st.session_state.mapa_router_nat['Status do Servico']!='CANCELADO')]\
+        .reset_index(drop=True)
 
     mapa_router_nat['Base Luck'] = 'NAT'
 
-    mapa_router_mcz = st.session_state.mapa_router_mcz
+    mapa_router_mcz = st.session_state.mapa_router_mcz[(st.session_state.mapa_router_mcz['Status do Servico']!='CANCELADO')]\
+        .reset_index(drop=True)
+        
+    mapa_router_mcz = mapa_router_mcz[~mapa_router_mcz['Observacao'].str.upper().str.contains('CLD', na=False)]
 
     mapa_router_mcz['Base Luck'] = 'MCZ'
 
-    mapa_router_ssa = st.session_state.mapa_router_ssa
+    mapa_router_ssa = st.session_state.mapa_router_ssa[(st.session_state.mapa_router_ssa['Status do Servico']!='CANCELADO')]\
+        .reset_index(drop=True)
 
     mapa_router_ssa['Base Luck'] = 'SSA'
 
-    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz, mapa_router_ssa], 
+    mapa_router_nor = st.session_state.mapa_router_nor[(st.session_state.mapa_router_nor['Status do Servico']!='CANCELADO')]\
+            .reset_index(drop=True)
+    
+    mapa_router_nor['Base Luck'] = 'NOR'
+
+    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz, mapa_router_ssa, mapa_router_nor], 
                                     ignore_index=True)
     
     return mapa_router_geral
@@ -248,7 +320,7 @@ if 'mapa_router_jp' not in st.session_state:
 
     puxar_dfs_base_phoenix()
 
-st.title('Luck Geral')
+st.title('Paxs IN - Luck Geral')
 
 st.divider()
 
@@ -260,7 +332,7 @@ with row0[0]:
 
     data_final = st.date_input('Data Final', value=None ,format='DD/MM/YYYY', key='data_final')
 
-    base_luck = st.selectbox('Base Luck', ['João Pessoa', 'Natal', 'Recife', 'Maceió', 'Salvador', 'Todas'], index=None)
+    base_luck = st.selectbox('Base Luck', ['João Pessoa', 'Natal', 'Recife', 'Maceió', 'Salvador', 'Noronha', 'Todas'], index=None)
 
 with row0[1]:
 
@@ -293,8 +365,7 @@ if tipo_analise=='Paxs IN':
         df_mapa_ref = gerar_dfs_base(base_luck)
 
         df_mapa_filtrado = df_mapa_ref[(df_mapa_ref['Data Execucao'] >= data_inicial) & (df_mapa_ref['Data Execucao'] <= data_final) & 
-                                    (df_mapa_ref['Tipo de Servico']=='IN') & (df_mapa_ref['Status do Servico']!='CANCELADO') & 
-                                    (df_mapa_ref['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
+                                    (df_mapa_ref['Tipo de Servico']=='IN')].reset_index(drop=True)
         
         df_mapa_filtrado['Paxs Totais'] = df_mapa_filtrado['Total ADT'] + df_mapa_filtrado['Total CHD']
 
@@ -302,29 +373,54 @@ if tipo_analise=='Paxs IN':
 
         st.success(f'No período selecionado existem {paxs_in} passageiros.')
 
-        df_mapa_filtrado_group = df_mapa_filtrado.groupby('Servico')['Paxs Totais'].sum().reset_index()
+        row2 = st.columns(2)
 
-        st.dataframe(df_mapa_filtrado_group.sort_values(by='Paxs Totais', ascending=False), hide_index=True)
+        with row2[0]:
+
+            df_mapa_filtrado_group = df_mapa_filtrado.groupby('Servico')['Paxs Totais'].sum().reset_index()
+
+            st.dataframe(df_mapa_filtrado_group.sort_values(by='Paxs Totais', ascending=False), hide_index=True)
+
+        with row2[1]:
+
+            df_mapa_filtrado_group_parceiro = df_mapa_filtrado.groupby('Parceiro')['Paxs Totais'].sum().reset_index()
+
+            st.dataframe(df_mapa_filtrado_group_parceiro.sort_values(by='Paxs Totais', ascending=False), hide_index=True)
 
     elif data_inicial and data_final and base_luck!='Todas' and base_luck and data_inicial.month != data_final.month:
 
         df_mapa_ref = gerar_dfs_base(base_luck)
 
         df_mapa_filtrado = df_mapa_ref[(df_mapa_ref['Data Execucao'] >= data_inicial) & (df_mapa_ref['Data Execucao'] <= data_final) & 
-                                    (df_mapa_ref['Tipo de Servico']=='IN') & (df_mapa_ref['Status do Servico']!='CANCELADO') & 
-                                    (df_mapa_ref['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
+                                    (df_mapa_ref['Tipo de Servico']=='IN')].reset_index(drop=True)
         
         df_mapa_filtrado['Paxs Totais'] = df_mapa_filtrado['Total ADT'] + df_mapa_filtrado['Total CHD']
 
         df_mapa_filtrado = criar_coluna_ano_mes(df_mapa_filtrado)
 
-        df_mapa_filtrado_group = df_mapa_filtrado.groupby(['Ano/Mês'])['Paxs Totais'].sum().reset_index()
-
-        row1 = st.columns(1)
+        row1 = st.columns(2)
 
         with row1[0]:
 
+            df_mapa_filtrado_group = df_mapa_filtrado.groupby(['Ano/Mês'])['Paxs Totais'].sum().reset_index()
+
             grafico_linha_numero(df_mapa_filtrado_group, 'Ano/Mês', 'Paxs Totais', 'Paxs IN', 'Paxs IN')
+
+        with row1[1]:
+
+            lista_maiores_parceiros = df_mapa_filtrado.groupby(['Parceiro'])['Paxs Totais'].sum().reset_index()\
+                .sort_values(by='Paxs Totais', ascending=False).reset_index(drop=True).iloc[:5]['Parceiro'].tolist()
+            
+            df_mapa_filtrado_group_parceiro = df_mapa_filtrado[df_mapa_filtrado['Parceiro'].isin(lista_maiores_parceiros)]\
+                .groupby(['Ano/Mês', 'Parceiro'])['Paxs Totais'].sum().reset_index()
+            
+            df_mapa_filtrado_group_parceiro = transformar_em_varias_colunas(df_mapa_filtrado_group_parceiro, 'Parceiro')
+
+            lista_colunas = df_mapa_filtrado_group_parceiro.columns.tolist()
+
+            grafico_cinco_linhas_numero(df_mapa_filtrado_group_parceiro, 'Ano/Mês', lista_colunas[1], lista_colunas[1], lista_colunas[2], 
+                                        lista_colunas[2], lista_colunas[3], lista_colunas[3], lista_colunas[4], lista_colunas[4], 
+                                        lista_colunas[5], lista_colunas[5], 'Paxs IN - Maiores Operadoras')
 
     elif data_inicial and data_final and base_luck=='Todas' and data_inicial.month == data_final.month:
 
@@ -332,9 +428,7 @@ if tipo_analise=='Paxs IN':
 
         mapa_router_geral_filtrado = mapa_router_geral[(mapa_router_geral['Data Execucao'] >= data_inicial) & 
                                                     (mapa_router_geral['Data Execucao'] <= data_final) & 
-                                                    (mapa_router_geral['Tipo de Servico']=='IN') & 
-                                                    (mapa_router_geral['Status do Servico']!='CANCELADO') & 
-                                                    (mapa_router_geral['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
+                                                    (mapa_router_geral['Tipo de Servico']=='IN')].reset_index(drop=True)
         
         mapa_router_geral_filtrado['Paxs Totais'] = mapa_router_geral_filtrado['Total ADT'] + mapa_router_geral_filtrado['Total CHD']
 
@@ -356,9 +450,7 @@ if tipo_analise=='Paxs IN':
 
         mapa_router_geral_filtrado = mapa_router_geral[(mapa_router_geral['Data Execucao'] >= data_inicial) & 
                                                     (mapa_router_geral['Data Execucao'] <= data_final) & 
-                                                    (mapa_router_geral['Tipo de Servico']=='IN') & 
-                                                    (mapa_router_geral['Status do Servico']!='CANCELADO') & 
-                                                    (mapa_router_geral['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
+                                                    (mapa_router_geral['Tipo de Servico']=='IN')].reset_index(drop=True)
         
         mapa_router_geral_filtrado['Paxs Totais'] = mapa_router_geral_filtrado['Total ADT'] + mapa_router_geral_filtrado['Total CHD']
 
@@ -374,8 +466,8 @@ if tipo_analise=='Paxs IN':
 
         with row1[0]:
 
-            grafico_cinco_linhas_numero(df_mapa_filtrado_group_2, 'Ano/Mês', 'JPA', 'João Pessoa', 'NAT', 'Natal', 'REC', 'Recife', 'MCZ', 
-                                        'Maceió', 'SSA', 'Salvador', 'Paxs IN')
+            grafico_seis_linhas_numero(df_mapa_filtrado_group_2, 'Ano/Mês', 'JPA', 'João Pessoa', 'NAT', 'Natal', 'REC', 'Recife', 'MCZ', 
+                                        'Maceió', 'SSA', 'Salvador', 'NOR', 'Noronha', 'Paxs IN')
             
         with row1[1]:
 
@@ -438,7 +530,3 @@ if tipo_analise=='% Serviços':
 
             grafico_quatro_linhas_percentual(df_mapa_filtrado_group_2, 'Ano/Mês', '% IN', 'IN', '% OUT', 'OUT', '% TOUR', 'TOUR', 
                                              '% TRANSFER', 'TRANSFER', '')
-
-
-
-
