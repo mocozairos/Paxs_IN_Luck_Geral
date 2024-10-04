@@ -5,6 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 
 def gerar_df_phoenix(vw_name, base):
+    # Parametros de Login AWS
 
     nome_base = f'test_phoenix_{base}'
 
@@ -54,7 +55,7 @@ def puxar_dfs_base_phoenix():
 
         st.session_state.mapa_router_nor = gerar_df_phoenix('vw_router', 'noronha')
 
-        # st.session_state.mapa_router_ara = gerar_df_phoenix('vw_router', 'aracaju')
+        st.session_state.mapa_router_ara = gerar_df_phoenix('vw_router', 'aracaju')
 
     st.success('Dados baixados com sucesso!')
 
@@ -62,33 +63,33 @@ def gerar_dfs_base(base_luck):
 
     if base_luck=='João Pessoa':
 
-        df = st.session_state.mapa_router_jp[(st.session_state.mapa_router_jp['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
-                                             (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE NOTURNO') & 
-                                             (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE DIURNO ') & 
-                                             (st.session_state.mapa_router_jp['Status do Servico'] != 'CANCELADO')]\
-                                                .reset_index(drop=True)
+        df = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck'] == 'JPA') & 
+                                                (st.session_state.mapa_router_geral['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
+                                                (st.session_state.mapa_router_geral['Servico'] != 'GUIA BASE NOTURNO') & 
+                                                (st.session_state.mapa_router_geral['Servico'] != 'GUIA BASE DIURNO ') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico'] != 'CANCELADO')].reset_index(drop=True)
 
         return df
 
     elif base_luck=='Recife':
 
-        df = st.session_state.mapa_router_rec[(st.session_state.mapa_router_rec['Status do Servico']!='CANCELADO') & 
-                                              (st.session_state.mapa_router_rec['Status do Servico']!='RASCUNHO')]\
-                                                .reset_index(drop=True)
+        df = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck'] == 'REC') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
     
         return df
 
     elif base_luck=='Natal':
 
-        df = st.session_state.mapa_router_nat[(st.session_state.mapa_router_nat['Status do Servico']!='CANCELADO')]\
-            .reset_index(drop=True)
+        df = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck'] == 'NAT') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
 
         return df
 
     elif base_luck=='Maceió':
 
-        df = st.session_state.mapa_router_mcz[(st.session_state.mapa_router_mcz['Status do Servico']!='CANCELADO')]\
-            .reset_index(drop=True)
+        df = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='MCZ') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
         
         df = df[~df['Observacao'].str.upper().str.contains('CLD', na=False)]
 
@@ -96,19 +97,22 @@ def gerar_dfs_base(base_luck):
 
     elif base_luck=='Salvador':
 
-        df = st.session_state.mapa_router_ssa[(st.session_state.mapa_router_ssa['Status do Servico']!='CANCELADO')]\
-            .reset_index(drop=True)
+        df = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='SSA') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
 
         return df
 
-    # elif base_luck=='Aracajú':
+    elif base_luck=='Aracajú':
 
-    #     return st.session_state.mapa_router_ara
+        df = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='AJU') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
+
+        return df
 
     elif base_luck=='Noronha':
 
-        df = st.session_state.mapa_router_nor[(st.session_state.mapa_router_nor['Status do Servico']!='CANCELADO')]\
-            .reset_index(drop=True)
+        df = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='FEN') & 
+                                                (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
 
         return df
 
@@ -258,34 +262,34 @@ def criar_coluna_ano_mes(df_mapa_filtrado):
 
 def gerar_mapa_router_geral():
 
-    mapa_router_jp = st.session_state.mapa_router_jp[(st.session_state.mapa_router_jp['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
-                                                     (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE NOTURNO') & 
-                                                     (st.session_state.mapa_router_jp['Servico'] != 'GUIA BASE DIURNO ') & 
-                                                     (st.session_state.mapa_router_jp['Status do Servico'] != 'CANCELADO')]\
-                                                     .reset_index(drop=True)
+    mapa_router_jp = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck'] == 'JPA') & 
+                                                        (st.session_state.mapa_router_geral['Servico'] != 'FAZER CONTATO - SEM TRF IN ') & 
+                                                        (st.session_state.mapa_router_geral['Servico'] != 'GUIA BASE NOTURNO') & 
+                                                        (st.session_state.mapa_router_geral['Servico'] != 'GUIA BASE DIURNO ') & 
+                                                        (st.session_state.mapa_router_geral['Status do Servico'] != 'CANCELADO')].reset_index(drop=True)
 
     mapa_router_jp['Base Luck'] = 'JPA'
 
-    mapa_router_rec = st.session_state.mapa_router_rec[(st.session_state.mapa_router_rec['Status do Servico']!='CANCELADO') & 
-                                                       (st.session_state.mapa_router_rec['Status do Servico']!='RASCUNHO')]\
-                                                        .reset_index(drop=True)
+    mapa_router_rec = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck'] == 'REC') & 
+                                                         (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO') & 
+                                                         (st.session_state.mapa_router_geral['Status do Servico']!='RASCUNHO')].reset_index(drop=True)
 
     mapa_router_rec['Base Luck'] = 'REC'
 
-    mapa_router_nat = st.session_state.mapa_router_nat[(st.session_state.mapa_router_nat['Status do Servico']!='CANCELADO')]\
-        .reset_index(drop=True)
+    mapa_router_nat = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck'] == 'NAT') & 
+                                                         (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
 
     mapa_router_nat['Base Luck'] = 'NAT'
 
-    mapa_router_mcz = st.session_state.mapa_router_mcz[(st.session_state.mapa_router_mcz['Status do Servico']!='CANCELADO')]\
-        .reset_index(drop=True)
+    mapa_router_mcz = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='MCZ') & 
+                                                         (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
         
     mapa_router_mcz = mapa_router_mcz[~mapa_router_mcz['Observacao'].str.upper().str.contains('CLD', na=False)]
 
     mapa_router_mcz['Base Luck'] = 'MCZ'
 
-    mapa_router_ssa = st.session_state.mapa_router_ssa[(st.session_state.mapa_router_ssa['Status do Servico']!='CANCELADO')]\
-        .reset_index(drop=True)
+    mapa_router_ssa = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='SSA') & 
+                                                         (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
 
     mapa_router_ssa['Base Luck'] = 'SSA'
 
@@ -294,8 +298,13 @@ def gerar_mapa_router_geral():
     
     mapa_router_nor['Base Luck'] = 'NOR'
 
-    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz, mapa_router_ssa, mapa_router_nor], 
-                                    ignore_index=True)
+    mapa_router_ara = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='FEN') & 
+                                                         (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
+    
+    mapa_router_ara['Base Luck'] = 'AJU'
+
+    mapa_router_geral = pd.concat([mapa_router_jp, mapa_router_rec, mapa_router_nat, mapa_router_mcz, mapa_router_ssa, mapa_router_nor, mapa_router_ara], 
+                                  ignore_index=True)
     
     return mapa_router_geral
 
@@ -315,9 +324,11 @@ def transformar_em_varias_colunas(df_mapa_filtrado_group, coluna_ref):
 
 st.set_page_config(layout='wide')
 
-if 'mapa_router_jp' not in st.session_state:
+if 'mapa_router_geral' not in st.session_state:
 
-    puxar_dfs_base_phoenix()
+    # puxar_dfs_base_phoenix()
+
+    st.session_state.mapa_router_geral = gerar_df_phoenix('vw_router_geral', 'joao_pessoa')
 
 st.title('Paxs IN - Luck Geral')
 
@@ -331,7 +342,7 @@ with row0[0]:
 
     data_final = st.date_input('Data Final', value=None ,format='DD/MM/YYYY', key='data_final')
 
-    base_luck = st.selectbox('Base Luck', ['João Pessoa', 'Natal', 'Recife', 'Maceió', 'Salvador', 'Noronha', 'Todas'], index=None)
+    base_luck = st.selectbox('Base Luck', ['João Pessoa', 'Natal', 'Recife', 'Maceió', 'Salvador', 'Noronha', 'Aracajú', 'Todas'], index=None)
 
 with row0[1]:
 
@@ -353,7 +364,9 @@ with row0[1]:
 
 if atualizar_dados:
 
-    puxar_dfs_base_phoenix()
+    # puxar_dfs_base_phoenix()
+
+    st.session_state.mapa_router_geral = gerar_df_phoenix('vw_router_geral', 'joao_pessoa')
 
 st.divider()
 
