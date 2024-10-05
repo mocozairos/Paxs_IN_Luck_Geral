@@ -293,12 +293,12 @@ def gerar_mapa_router_geral():
 
     mapa_router_ssa['Base Luck'] = 'SSA'
 
-    mapa_router_nor = st.session_state.mapa_router_nor[(st.session_state.mapa_router_nor['Status do Servico']!='CANCELADO')]\
-            .reset_index(drop=True)
+    mapa_router_nor = st.session_state.mapa_router_nor[(st.session_state.mapa_router_geral['Base Luck']=='FEN') & 
+                                                       (st.session_state.mapa_router_nor['Status do Servico']!='CANCELADO')].reset_index(drop=True)
     
-    mapa_router_nor['Base Luck'] = 'NOR'
+    mapa_router_nor['Base Luck'] = 'FEN'
 
-    mapa_router_ara = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='FEN') & 
+    mapa_router_ara = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='AJU') & 
                                                          (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')].reset_index(drop=True)
     
     mapa_router_ara['Base Luck'] = 'AJU'
