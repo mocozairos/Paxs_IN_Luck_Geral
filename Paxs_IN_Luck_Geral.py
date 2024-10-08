@@ -293,8 +293,9 @@ def gerar_mapa_router_geral():
 
     mapa_router_ssa['Base Luck'] = 'SSA'
 
-    mapa_router_nor = st.session_state.mapa_router_nor[(st.session_state.mapa_router_geral['Base Luck']=='FEN') & 
-                                                       (st.session_state.mapa_router_nor['Status do Servico']!='CANCELADO')].reset_index(drop=True)
+    mapa_router_nor = st.session_state.mapa_router_geral[(st.session_state.mapa_router_geral['Base Luck']=='FEN') & 
+                                                         (st.session_state.mapa_router_geral['Status do Servico']!='CANCELADO')]\
+            .reset_index(drop=True)
     
     mapa_router_nor['Base Luck'] = 'FEN'
 
@@ -542,3 +543,4 @@ if tipo_analise=='% Serviços':
 
             grafico_quatro_linhas_percentual(df_mapa_filtrado_group_2, 'Ano/Mês', '% IN', 'IN', '% OUT', 'OUT', '% TOUR', 'TOUR', 
                                              '% TRANSFER', 'TRANSFER', '')
+
